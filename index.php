@@ -1,81 +1,105 @@
 <?php
 
 	//busca o arquico no caminho raiz
-	$name_arquivo = 'C:\wamp64\www\devramp\teste.java';
+	$name_file = 'C:\wamp64\www\devramp\teste.java';
 
+	// vai abrir o arquivo informado
+	$file = file($name_file);
 
-	$arq = file($name_arquivo);
-
-	//verifica se arquivo tem conteudo
-	if (empty($arq)){
-		echo 'arquivo vazio';
+	//verifica se conseguiu abrir o arquivo
+	if (empty($file)){
+		echo 'arquivo não abriu.<br>';
 	}
 	else{
-		echo 'arquivo com conteudo';
+		echo 'arquivo aberto.<br>';
 	}
 
-	$num_linhas = count($arq);
+	//$num_linhas = count($arq);
 	
-	$i = 0;
+	// variavel para guardar o indice do array com o conteudo das linhas
+	$index = 0;
+	
+	// variavel para controlar as verificações de comentários de multiplas linhas, não permitinho outra verificação de inicio de comentário até achar fim do comentário
+	$blocker = 0;
+
+	// variavel para controlar o numero da linha com abertuda de comentário */ 
+	$ini_n_lines_coments = 0;
+
+	// variavel para controlar o numero da linha com abertuda de comentário */
+	$end_n_lines_coments = 0;
+	
+	// Variavel para armazenar o número de linhas descartáveis
+	$count_lines = 0;
 
 
-		$bloqueador = 0;
 
-		$count_linhas = 0;
-
-		$ini_coment_pos = 0;
-		$fim_coment_pos = 0;
-
-	foreach($arq as $i => $conteudo){
+	foreach($file as $index => $content){
 		//$conteudo_linha[$i] =  $conteudo;
 
-		echo '<br> Linha: ' . $i . ' Conteúdo: '. $conteudo . '<br>'; // . '<br>Substring:' . substr($conteudo, 0); 
-	}	
-	foreach($arq as $i => $conteudo){
-		//$conteudo_linha[$i] =  $conteudo;
-		//
-		//echo '<br> Linha: ' . $i . ' Conteúdo: '. $conteudo . '<br>'; // . '<br>Substring:' . substr($conteudo, 0); 
-		//stripos(string, find, start) - encontra a posição da primeira ocorrencia
-		//echo '<br> Ocorrencia Posição: ' . stripos($conteudo, '/*') . '	';
-
+		echo '<br> Linha: ' . $index . ' Conteúdo: '. $content . '<br>'; // . '<br>Substring:' . substr($conteudo, 0); 
+	}
+	//
+	foreach($file as $index => $content)
+	{
+		/*
 		if ($ini_coment_pos == 0 && $fim_coment_pos == 0)
 			if ($bloqueador == 0 && stripos($conteudo, '//') > -1){
 				$position = stripos(ltrim($conteudo), '//');
 				if ($position == 0){
-					echo '<br>' .$i . ' | ' . $position . '<br>';
+					//echo '<br>' .$i . ' | ' . $position . '<br>';
 				//echo '<br>Comentário Simples.' . stripos($conteudo, '//');
 				$count_linhas++;}
 			}
+		*/
+		// Verifica se a contagem de linhas para comentários de n linhas está iniciada		
+		if($ini_n_lines_coments == 0 && $end_n_lines_coments == 0)
+			//verifica se as linhas estão desbloqueadas para buscar comentário de uma linha
+			//ltrim elimina os espaços a esquerda fazendo com que comentário de uma linha sempre inicie na posição 0 da linha
+			if($blocker == 0 && stripos($content, '//') > -1)
+			{
+				$position = stripos(ltrim($content), '//');
+				if ($position == 0)
+				{
+					echo '<br>' . $index . ' | '. $position . '<br>';
+					$count_lines++;
+				}
+			}
 
-		if($bloqueador == 0  && stripos($conteudo, '/*') > -1){
-			$ini_coment_pos = $i;
-			$bloqueador = 1;
+
+		if($blocker == 0  && stripos($content, '/*') > -1){
+			$ini_n_lines_coments = $index;
+			$blocker = 1;
 		}
 
-		if ($bloqueador == 1 && stripos($conteudo, '*/') > -1){
-			$fim_coment_pos = $i;
-			$bloqueador = 0;
+		if ($blocker == 1 && stripos($content, '*/') > -1){
+			$end_n_lines_coments = $index;
+			$blocker = 0;
 		}
 
-		if ($ini_coment_pos > 0 && $fim_coment_pos > 0){
-			if ($ini_coment_pos != $fim_coment_pos){
-				$count_linhas = $count_linhas + (($fim_coment_pos - $ini_coment_pos) + 1);
-				echo '<br>'.$i.'Inicio Comentarios Compostos:' . $ini_coment_pos;
-				echo '<br>'.$i.'Fim Comentários Compostos:' . $fim_coment_pos;
-				$ini_coment_pos = 0;
-				$fim_coment_pos = 0;		
+		if ($ini_n_lines_coments > 0 && $end_n_lines_coments > 0 )
+		{
+
+			if ($ini_n_lines_coments != $end_n_lines_coments)
+			{
+
+				$count_lines = $count_lines + (($end_n_lines_coments - $ini_n_lines_coments) + 1);
+				echo '<br>'.$index.'Inicio Comentarios Compostos:' . $ini_n_lines_coments;
+				echo '<br>'.$index.'Fim Comentários Compostos:' . $end_n_lines_coments;
+				$ini_n_lines_coments = 0;
+				$end_n_lines_coments = 0;		
 			}
 		}
-		
 
-
-		
-
-		
+		if (empty(trim($content))){
+			echo '<br>' . $index . '| Linha vazia';
+			$count_lines++;
+		}
+		/*else {
+			echo $index . '| Linha com caracteres: ' . $content;
+		}*/
 
 	}
-
-	echo '<br>' . $count_linhas;
+	echo '<br>' . $count_lines;
 
 		
 	
