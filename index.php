@@ -1,106 +1,83 @@
-<?php
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+    	<meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
 
-	//busca o arquico no caminho raiz
-	$name_file = 'C:\wamp64\www\devramp\teste.java';
+    	<title>Desafio DevRam</title>
+	   	
+	   	<!-- Bootstrap CSS -->
+	    <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css' integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh' crossorigin='anonymous'>
 
-	// vai abrir o arquivo informado
-	$file = file($name_file);
+	    <!-- Optional JavaScript -->
+	    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	    <script src='https://code.jquery.com/jquery-3.4.1.slim.min.js' integrity='sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n' crossorigin='anonymous'></script>
+	    <script src='https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js' integrity='sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo' crossorigin='anonymous'></script>
+	    <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js' integrity='sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6' crossorigin='anonymous'></script>
 
-	//verifica se conseguiu abrir o arquivo
-	if (empty($file)){
-		echo 'arquivo não abriu.<br>';
-	}
-	else{
-		echo 'arquivo aberto.<br>';
-	}
+	    <style>
+	    	.boxCenter{
+	    		width: 500px;
+	    		height: 500px;
+	    		padding-top: 200px;
+	    		text-align: center;
+	    	}
+	    	.boxAlertError{
+	    		margin-top: 20px;
+	    		height: 100px;
+	    		width: 500px;
+	    		background-color: red;
+	    		padding-top: 10px;
+	    	}
+	    	.boxAlertSuccess{
+	    		margin-top: 20px;
+	    		height: 100px;
+	    		width: 500px;
+	    		background-color: green;
+	    		padding-top: 10px;
+	    	}
+	    </style>
+	</head>
 
-	//$num_linhas = count($arq);
-	
-	// variavel para guardar o indice do array com o conteudo das linhas
-	$index = 0;
-	
-	// variavel para controlar as verificações de comentários de multiplas linhas, não permitinho outra verificação de inicio de comentário até achar fim do comentário
-	$blocker = 0;
+	<body>
+		<div class = 'container-fluid'>
+			<div class='row'>
+				<div class='col-lg-4'></div>
+				<div class='col-lg-4 boxCenter' >
+					<form method='GET' action='validateFile.php' enctype='multipart/form-data'>
+						<div>
+							<p><strong>Informe o arquivo-fonte do Java que deseja inspecionar.<strong></p>
+						</div>
+						<div>
+							<input type='file' name='name_file' id='name_file' required>
+						</div>
+						<br>
+						<button class="btn btn-primary" type="submit">Contar Linhas Efetivas de Código</button>
+					</form>
 
-	// variavel para controlar o numero da linha com abertuda de comentário */ 
-	$ini_n_lines_coments = 0;
+					<?php 
+						if($_GET['codigo'] == 1){ 
+							echo "
+								<div class='boxAlertError'> 
+									Erro na extensão de arquivo.
+								</div>";
+						} else if($_GET['codigo'] == 2){ 
+							echo "
+								<div class='boxAlertError'> 
+									<p>Arquivo vazio.</p>
+								</div>";
+						}
 
-	// variavel para controlar o numero da linha com abertuda de comentário */
-	$end_n_lines_coments = 0;
-	
-	// Variavel para armazenar o número de linhas descartáveis
-	$count_lines = 0;
-
-
-
-	foreach($file as $index => $content){
-		//$conteudo_linha[$i] =  $conteudo;
-
-		echo '<br> Linha: ' . $index . ' Conteúdo: '. $content . '<br>'; // . '<br>Substring:' . substr($conteudo, 0); 
-	}
-	//
-	foreach($file as $index => $content)
-	{
-		/*
-		if ($ini_coment_pos == 0 && $fim_coment_pos == 0)
-			if ($bloqueador == 0 && stripos($conteudo, '//') > -1){
-				$position = stripos(ltrim($conteudo), '//');
-				if ($position == 0){
-					//echo '<br>' .$i . ' | ' . $position . '<br>';
-				//echo '<br>Comentário Simples.' . stripos($conteudo, '//');
-				$count_linhas++;}
-			}
-		*/
-		// Verifica se a contagem de linhas para comentários de n linhas está iniciada		
-		if($ini_n_lines_coments == 0 && $end_n_lines_coments == 0)
-			//verifica se as linhas estão desbloqueadas para buscar comentário de uma linha
-			//ltrim elimina os espaços a esquerda fazendo com que comentário de uma linha sempre inicie na posição 0 da linha
-			if($blocker == 0 && stripos($content, '//') > -1)
-			{
-				$position = stripos(ltrim($content), '//');
-				if ($position == 0)
-				{
-					echo '<br>' . $index . ' | '. $position . '<br>';
-					$count_lines++;
-				}
-			}
-
-
-		if($blocker == 0  && stripos($content, '/*') > -1){
-			$ini_n_lines_coments = $index;
-			$blocker = 1;
-		}
-
-		if ($blocker == 1 && stripos($content, '*/') > -1){
-			$end_n_lines_coments = $index;
-			$blocker = 0;
-		}
-
-		if ($ini_n_lines_coments > 0 && $end_n_lines_coments > 0 )
-		{
-
-			if ($ini_n_lines_coments != $end_n_lines_coments)
-			{
-
-				$count_lines = $count_lines + (($end_n_lines_coments - $ini_n_lines_coments) + 1);
-				echo '<br>'.$index.'Inicio Comentarios Compostos:' . $ini_n_lines_coments;
-				echo '<br>'.$index.'Fim Comentários Compostos:' . $end_n_lines_coments;
-				$ini_n_lines_coments = 0;
-				$end_n_lines_coments = 0;		
-			}
-		}
-
-		if (empty(trim($content))){
-			echo '<br>' . $index . '| Linha vazia';
-			$count_lines++;
-		}
-		/*else {
-			echo $index . '| Linha com caracteres: ' . $content;
-		}*/
-
-	}
-	echo '<br>' . $count_lines;
-
-		
-	
-	
+						else {
+							echo "
+								<div class='boxAlertSuccess'> 
+									<p><stromg>Número de linhas de código-efetivo:</strong></p>
+								</div>";
+						}  
+					?>
+				</div>
+				<div class='col-lg-4'></div>
+			</div>
+		</div>
+	</body>
+</hmtl>
