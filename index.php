@@ -22,19 +22,33 @@
 	    		padding-top: 200px;
 	    		text-align: center;
 	    	}
+
+	    	.boxCenter p{
+	    		text-align: center;
+	    	}
 	    	.boxAlertError{
 	    		margin-top: 20px;
 	    		height: 100px;
-	    		width: 500px;
+	    		width: 300px;
+	    		margin-left: auto;
+	    		margin-right: auto;
 	    		background-color: red;
-	    		padding-top: 10px;
+	    		padding-top: 35px;
+	    		text-align: center;
 	    	}
 	    	.boxAlertSuccess{
 	    		margin-top: 20px;
 	    		height: 100px;
-	    		width: 500px;
-	    		background-color: green;
+	    		width: 300px;
+	    		margin-left: auto;
+	    		margin-right: auto;
+	    		background-color: #00a86b;
+	    		color: #ffffff;
 	    		padding-top: 10px;
+	    		text-align: center;
+	    	}
+	    	.result{
+	    		font-size: 34px;
 	    	}
 	    </style>
 	</head>
@@ -56,24 +70,32 @@
 					</form>
 
 					<?php 
-						if($_GET['codigo'] == 1){ 
-							echo "
-								<div class='boxAlertError'> 
-									Erro na extensão de arquivo.
-								</div>";
-						} else if($_GET['codigo'] == 2){ 
-							echo "
-								<div class='boxAlertError'> 
-									<p>Arquivo vazio.</p>
-								</div>";
+						if (empty($_GET['error']) && empty($_GET['result'])){
+							echo '';
 						}
+						else{
+							if(empty($_GET['result'])){
+								if($_GET['error'] == 1) { 
+								echo "
+									<div class='boxAlertError'> 
+										Erro na extensão de arquivo.
+									</div>";
+								} else if($_GET['error'] == 2){ 
+									echo "
+										<div class='boxAlertError'> 
+											<p>Arquivo vazio.</p>
+										</div>";
+								}
 
-						else {
-							echo "
-								<div class='boxAlertSuccess'> 
-									<p><stromg>Número de linhas de código-efetivo:</strong></p>
-								</div>";
-						}  
+							}
+							else{
+								echo "
+									<div class='boxAlertSuccess'> 
+										<p><stromg>Número de linhas de código-efetivo:</strong></p>
+										<p class='result'><strong>" . $_GET['result'] . "</strong></p>
+									</div>";
+							}
+						}
 					?>
 				</div>
 				<div class='col-lg-4'></div>

@@ -3,19 +3,26 @@
 	//busca o arquico no caminho raiz
 	$name_file = $_GET['name_file'];
 
-	
-
-	
-
-
 	checkExtensionFile($name_file);
+	
 
-	$file = checkContentFile($name_file);
 
-	lineCounter($file);
+	function effectivelines($lines, $discardLines){
+		
+
+		// Gera o resultados de linhas de codigo-efetivas
+		$result = $lines - $discardLines;
+
+		//echo $result;
+		return header('Location: index.php?result='.$result);
+	}
+
 
 
 	function lineCounter($file){
+
+		// Contabiliza o total de linhas do arquivo
+		$lines = count($file);
 
 		// variavel para guardar o indice do array com o conteudo das linhas
 		$index = 0;
@@ -32,67 +39,62 @@
 		// Variavel para armazenar o número de linhas descartáveis
 		$count_lines = 0;
 	
-		foreach($file as $index => $content){
-			//$conteudo_linha[$i] =  $conteudo;
-
-			echo '<br> Linha: ' . $index . ' Conteúdo: '. $content . '<br>'; // . '<br>Substring:' . substr($conteudo, 0); 
-		}
-
+		
 		// Percorre o arquivo e aribui o conteudo de cada linha a um array $content
-		foreach($file as $index => $content)
-		{
+		foreach($file as $index => $content){
 			// Verifica se a contagem de linhas para comentários de n linhas não está ativa		
-			if($ini_n_lines_coments == 0 && $end_n_lines_coments == 0)
-
-				//verifica se as linhas estão desbloqueadas para buscar comentário de uma linha
-				
+			if($ini_n_lines_coments == 0 && $end_n_lines_coments == 0){
+				//verifica se as linhas estão desbloqueadas para buscar comentário de uma linha		
 				//ltrim elimina os espaços a esquerda fazendo com que comentário de uma linha sempre inicie na posição 0 da linha
-				
-				if($blocker == 0 && stripos($content, '//') > -1)
-				{
+				if($blocker == 0 && stripos($content, '//') > -1){
 					$position = stripos(ltrim($content), '//');
 					if ($position == 0)
-					{
-						echo '<br>' . $index . ' | '. $position . '<br>';
 						$count_lines++;
-					}
+					
 				}
+			}
 
 
+			// Verifica a ocorrencia que caracteriza o inicio de um comentário de n linhas
 			if($blocker == 0  && stripos($content, '/*') > -1){
+				// Armazena a posição de inico do comentário
 				$ini_n_lines_coments = $index;
+				// Bloqueia para que essa verificação não ocorra nas linhas seguintes até achar o final */
 				$blocker = 1;
 			}
 
+			// Verifica a ocorrencia de termino de comentário sendo que já foi iniciado um comentário /*
 			if ($blocker == 1 && stripos($content, '*/') > -1){
+				// Armazena a posição de termino do comentário
 				$end_n_lines_coments = $index;
+				// Ao encontrar o fim do comentário libera para que busquem novos inicios /*
 				$blocker = 0;
 			}
 
-			if ($ini_n_lines_coments > 0 && $end_n_lines_coments > 0 )
-			{
-
+			// Verifica se os armazenadores das posições de comentários de n linhas estão preenchidos - existencia de comentário identificado
+			if ($ini_n_lines_coments > 0 && $end_n_lines_coments > 0 ){
+				// Trata os comentários de n linhas que possam estar após uma string que devem ser desconsiderados dos descartes
 				if ($ini_n_lines_coments != $end_n_lines_coments)
 				{
-
+					// Ajusta o contador de linhas a serem descartadas
 					$count_lines = $count_lines + (($end_n_lines_coments - $ini_n_lines_coments) + 1);
-					echo '<br>'.$index.'Inicio Comentarios Compostos:' . $ini_n_lines_coments;
-					echo '<br>'.$index.'Fim Comentários Compostos:' . $end_n_lines_coments;
+					/* 
+						Seta os marcadores de posição para zero para posibilitar encontrar comentários simples
+						também auxilia para desconsiderar a caracterização de ocorrência de comentários simples 
+						em meio a comentários de n linhas
+					*/
 					$ini_n_lines_coments = 0;
 					$end_n_lines_coments = 0;		
 				}
 			}
 
-			if (empty(trim($content))){
-				echo '<br>' . $index . '| Linha vazia';
-				$count_lines++;
-			}
-			/*else {
-				echo $index . '| Linha com caracteres: ' . $content;
-			}*/
+			//Verifica a ocorrencia de linhas vazias
+			if (empty(trim($content)))
+				$count_lines++;		
 
 		}
-		echo '<br>' . $count_lines;
+		//Vai chamar a função geradora de resultado
+		effectivelines($lines, $count_lines);
 	}
 
 
@@ -103,10 +105,11 @@
 		
 		//verifica se o arquivo tem conteudo para analisar
 		if (empty($file)){
-			return header('Location: index.php?codigo=2');
+			return header('Location: index.php?error=2');
 		}
 		else {
-			return $file;
+			// vai chamar a funcao que identifica as ocorrências de comentários
+			lineCounter($file);
 		}
 
 	}	
@@ -117,11 +120,14 @@
 		$file_extension = substr($name_file, -4);
 
 		if (strcmp($file_extension, 'java') != 0){
-			return header('Location: index.php?codigo=1');
+			return header('Location: index.php?error=1');
 		}
-		return 0;
+		else{
+			//vai chamar a verificação do arquivo para ver se não é vazio
+			checkContentFile($name_file);
+		}
 	}		
-		
+?>	
 
 
 
